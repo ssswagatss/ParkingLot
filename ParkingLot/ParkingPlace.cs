@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParkingLot
 {
     public class ParkingPlace
     {
-        private static int NUMBER_OF_SMALL_SLOTS = 10;
-        private static int NUMBER_OF_COMPACT_SLOTS = 10;
-        private static int NUMBER_OF_LARGE_SLOTS = 10;
-        public Dictionary<long, Slot> occupiedSlots;
+        private static int NUMBER_OF_SMALL_SLOTS = 2;
+        private static int NUMBER_OF_COMPACT_SLOTS = 2;
+        private static int NUMBER_OF_LARGE_SLOTS = 2;
+        public Dictionary<string, Slot> occupiedSlots;
         private List<Slot> smallSlots;
         private List<Slot> compactSlots;
         private List<Slot> largeSlots;
@@ -22,7 +20,7 @@ namespace ParkingLot
             compactSlots = new List<Slot>(NUMBER_OF_COMPACT_SLOTS);
             largeSlots = new List<Slot>(NUMBER_OF_LARGE_SLOTS);
             CreateSlots();
-            occupiedSlots = new Dictionary<long, Slot>();
+            occupiedSlots = new Dictionary<string, Slot>();
         }
 
         private void CreateSlots()
@@ -43,75 +41,90 @@ namespace ParkingLot
 
         }
 
-        public long Park(Vehicle vehicle)
+        public Tuple<string, long> Park(Vehicle vehicle)
         {
-
             Slot slot;
-            long uniqueToken = -1;
+            Tuple<string, long> vehicleAndSlot = null;
 
-            if (vehicle.GetType() == typeof(MotorCycle)) {
+            if (vehicle.GetType() == typeof(MotorCycle))
+            {
                 if ((slot = GetFirstEmptySlot(smallSlots)) != null)
                 {
-                    uniqueToken = parkHelper(slot, vehicle);
+                    vehicleAndSlot = parkHelper(slot, vehicle,smallSlots);
                 }
                 else if ((slot = GetFirstEmptySlot(compactSlots)) != null)
                 {
-                    uniqueToken = parkHelper(slot, vehicle);
+                    vehicleAndSlot = parkHelper(slot, vehicle, compactSlots);
                 }
                 else if ((slot = GetFirstEmptySlot(largeSlots)) != null)
                 {
-                    uniqueToken = parkHelper(slot, vehicle);
-                }
-            } else if (vehicle.GetType() == typeof(Car)) {
-                if ((slot = GetFirstEmptySlot(compactSlots)) != null)
-                {
-                    uniqueToken = parkHelper(slot, vehicle);
-                }
-                else if ((slot = GetFirstEmptySlot(largeSlots)) != null)
-                {
-                    uniqueToken = parkHelper(slot, vehicle);
-                }
-            } else {
-                if ((slot = GetFirstEmptySlot(largeSlots)) != null)
-                {
-                    uniqueToken = parkHelper(slot, vehicle);
+                    vehicleAndSlot = parkHelper(slot, vehicle, largeSlots);
                 }
             }
-            return uniqueToken;
+            else if (vehicle.GetType() == typeof(Car))
+            {
+                if ((slot = GetFirstEmptySlot(compactSlots)) != null)
+                {
+                    vehicleAndSlot = parkHelper(slot, vehicle, compactSlots);
+                }
+                else if ((slot = GetFirstEmptySlot(largeSlots)) != null)
+                {
+                    vehicleAndSlot = parkHelper(slot, vehicle, largeSlots);
+                }
+            }
+            else
+            {
+                if ((slot = GetFirstEmptySlot(largeSlots)) != null)
+                {
+                    vehicleAndSlot = parkHelper(slot, vehicle, largeSlots);
+                }
+            }
+            return vehicleAndSlot;
         }
 
-        public void UnPark(long uniqueToken)
+        public void UnPark(string vehicleNumber)
         {
-            occupiedSlots.First(x=>x.Key == uniqueToken).Value.UnPark();
-            occupiedSlots.Remove(uniqueToken);
+            occupiedSlots.First(x => x.Key == vehicleNumber).Value.UnPark();
+            occupiedSlots.Remove(vehicleNumber);
         }
 
         private Slot GetFirstEmptySlot(List<Slot> slots)
         {
-            bool isSlotFound = false;
             Slot emptySlot = null;
 
-            for (int i = 0; i < slots.Count -1 ; i++)
+            for (int i = 0; i < slots.Count; i++)
             {
-                if (!isSlotFound)
+                Slot slot = slots[i];
+
+                if (!slot.IsOccupied())
                 {
-                    emptySlot = slots.ElementAt(i+1);
-                    if (!emptySlot.IsOccupied())
-                    {
-                        isSlotFound = true;
-                        break;
-                    }
+                    //slots[i].Park();
+                    return slot;
                 }
             }
+
             return emptySlot;
         }
 
-        private long parkHelper(Slot slot, Vehicle vehicle)
+
+        private Tuple<string, long> parkHelper(Slot slot, Vehicle vehicle, List<Slot> slots)
         {
-            slot.Park();
-            long uniqueToken = vehicle.GetHashCode() * 43;
-            occupiedSlots.Add(uniqueToken, slot);
-            return uniqueToken;
+            if (!occupiedSlots.Any(x => x.Key.ToLower() == vehicle.VehicleNumber.ToLower()))
+            {
+                int index = slots.IndexOf(slots.Where(x => x.GetSlotNumber() == slot.GetSlotNumber()).First());
+                slots[index].Park();
+
+               // slot.Park();
+
+                occupiedSlots.Add(vehicle.VehicleNumber, slot);
+                return new Tuple<string, long>(vehicle.VehicleNumber, slot.GetSlotNumber());
+            }
+            else
+            {
+                Console.WriteLine("Already parked");
+                return new Tuple<string, long>("", 0);
+            }
+
         }
     }
 }
