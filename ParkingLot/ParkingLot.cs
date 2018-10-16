@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParkingLot
 {
@@ -28,6 +25,17 @@ namespace ParkingLot
         public ParkingFloor GetEmptyFloor(VehicleType type)
         {
             return this.ParkingFloors.FirstOrDefault(x => x.GetAvailableSlot(type) != null);
+        }
+        public void UnPark(string vehicleNumber)
+        {
+            for (int i = 0; i < this.ParkingFloors.Count; i++)
+            {
+                if (this.ParkingFloors.ElementAt(i).occupiedSlots.Any(y => y.Key.ToUpper() == vehicleNumber.ToUpper()))
+                {
+                    var key = this.ParkingFloors.ElementAt(i).occupiedSlots.First(y => y.Key.ToUpper() == vehicleNumber.ToUpper()).Key;
+                    this.ParkingFloors.ElementAt(i).occupiedSlots.Remove(key);
+                }
+            }
         }
 
     }

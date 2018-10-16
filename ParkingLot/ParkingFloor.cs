@@ -83,13 +83,6 @@ namespace ParkingLot
             }
             return vehicleAndSlot;
         }
-
-        public void UnPark(string vehicleNumber)
-        {
-            occupiedSlots.First(x => x.Key == vehicleNumber);
-            occupiedSlots.Remove(vehicleNumber);
-        }
-
         public Slot GetFirstEmptySlot(List<Slot> slots)
         {
             Slot emptySlot = null;

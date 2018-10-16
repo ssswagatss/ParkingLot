@@ -50,7 +50,7 @@ namespace ParkingLot
                         }
                         else
                         {
-                            Console.WriteLine("No parking floors avalable");
+                            Console.WriteLine("No parking floors available");
                         }
                         break;
                     case 4:
@@ -58,8 +58,7 @@ namespace ParkingLot
                         break;
                     case 5:
                         var vehicle = ReadInput(VehicleType.All);
-                        ParkingFloor floor = new ParkingFloor(0);
-                        floor.UnPark(vehicle);
+                        parkingLot.UnPark(vehicle);
                         break;
                     default:
                         Console.WriteLine("Incorrect choice");
