@@ -7,6 +7,7 @@ namespace ParkingLot
         private bool _isOccupied;
         private int _slotNumber;
 
+
         public Slot(int slotNumber)
         {
             _isOccupied = false;

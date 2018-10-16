@@ -6,7 +6,7 @@ namespace ParkingLot
     {
         static void Main(string[] args)
         {
-            var parkingPlace = new ParkingPlace();
+            var parkingLot = new ParkingLot();
 
             int userInput = 0;
             do
@@ -18,28 +18,55 @@ namespace ParkingLot
                     // TODO : Use enum
                     case 1:
                         var mototCycle = new MotorCycle(ReadInput(VehicleType.Motorcycle));
-                        PrintParkedVeichle(parkingPlace.Park(mototCycle), VehicleType.Motorcycle);
+                        var availableFloor = parkingLot.GetEmptyFloor(VehicleType.Motorcycle);
+                        if (availableFloor != null)
+                        {
+                            PrintParkedVeichle(availableFloor.Park(mototCycle), VehicleType.Motorcycle);
+                        }
+                        else
+                        {
+                            Console.WriteLine("No parking floors avalable");
+                        }
+                        
                         break;
                         
                     case 2:
                         var car = new Car(ReadInput(VehicleType.Car));
-                        PrintParkedVeichle(parkingPlace.Park(car),VehicleType.Car);
+                        if (parkingLot.GetEmptyFloor(VehicleType.Car) != null)
+                        {
+                            PrintParkedVeichle(parkingLot.GetEmptyFloor(VehicleType.Car).Park(car), VehicleType.Car);
+                        }
+                        else
+                        {
+                            Console.WriteLine("No parking floors avalable");
+                        }
                         break;
 
                     case 3:
-                        
-                        var bus = new Bus(ReadInput(VehicleType.Bus));
-                        PrintParkedVeichle(parkingPlace.Park(bus),VehicleType.Bus);
+                            var bus = new Bus(ReadInput(VehicleType.Bus));
+                        if (parkingLot.GetEmptyFloor(VehicleType.Bus) != null)
+                        {
+                            PrintParkedVeichle(parkingLot.GetEmptyFloor(VehicleType.Bus).Park(bus), VehicleType.Bus);
+                        }
+                        else
+                        {
+                            Console.WriteLine("No parking floors avalable");
+                        }
                         break;
                     case 4:
-                        PrintAllParkedVeichles(parkingPlace);
+                        PrintAllParkedVeichles(parkingLot);
+                        break;
+                    case 5:
+                        var vehicle = ReadInput(VehicleType.All);
+                        ParkingFloor floor = new ParkingFloor(0);
+                        floor.UnPark(vehicle);
                         break;
                     default:
                         Console.WriteLine("Incorrect choice");
                         break;
                 }
 
-            } while (userInput != 5);
+            } while (userInput != 6);
 
         }
         public static int DisplayMenu()
@@ -50,18 +77,23 @@ namespace ParkingLot
             Console.WriteLine("2. Park a Car");
             Console.WriteLine("3. Park a Bus");
             Console.WriteLine("4. List all parked vehicles");
-            Console.WriteLine("5. Exit");
+            Console.WriteLine("5. Unpark a vehicle");
+            Console.WriteLine("6. Exit");
             var result = Console.ReadLine();
             return Convert.ToInt32(result);
         }
 
-        public static void PrintAllParkedVeichles(ParkingPlace parkingPlace)
+        public static void PrintAllParkedVeichles(ParkingLot parkingLot)
         {
             Console.WriteLine("----------------All Parked Vehicles----------------");
             int c = 1;
-            foreach (var item in parkingPlace.occupiedSlots)
+            foreach (var flooor in parkingLot.ParkingFloors)
             {
-                Console.WriteLine($"{c++}. Vehicle Number-{item.Key}, {item.Value.GetType()} {item.Value.GetSlotNumber()}");
+                foreach (var item in flooor.occupiedSlots)
+                {
+                    Console.WriteLine($"{c++}. Vehicle Number-{item.Key.ToUpper()}, {item.Value.GetType()} Floor-{flooor.FloorNumber} Slot-{item.Value.GetSlotNumber()}");
+                }
+
             }
         }
 

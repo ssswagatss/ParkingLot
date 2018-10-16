@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ParkingLot
 {
-    public class ParkingPlace
+    public class ParkingFloor
     {
         private static int NUMBER_OF_SMALL_SLOTS = 2;
         private static int NUMBER_OF_COMPACT_SLOTS = 2;
@@ -13,14 +13,16 @@ namespace ParkingLot
         private List<Slot> smallSlots;
         private List<Slot> compactSlots;
         private List<Slot> largeSlots;
+        public int FloorNumber { get; set; }
 
-        public ParkingPlace()
+        public ParkingFloor(int floorNumber)
         {
             smallSlots = new List<Slot>(NUMBER_OF_SMALL_SLOTS);
             compactSlots = new List<Slot>(NUMBER_OF_COMPACT_SLOTS);
             largeSlots = new List<Slot>(NUMBER_OF_LARGE_SLOTS);
             CreateSlots();
             occupiedSlots = new Dictionary<string, Slot>();
+            FloorNumber = floorNumber;
         }
 
         private void CreateSlots()
@@ -50,7 +52,7 @@ namespace ParkingLot
             {
                 if ((slot = GetFirstEmptySlot(smallSlots)) != null)
                 {
-                    vehicleAndSlot = parkHelper(slot, vehicle,smallSlots);
+                    vehicleAndSlot = parkHelper(slot, vehicle, smallSlots);
                 }
                 else if ((slot = GetFirstEmptySlot(compactSlots)) != null)
                 {
@@ -84,11 +86,11 @@ namespace ParkingLot
 
         public void UnPark(string vehicleNumber)
         {
-            occupiedSlots.First(x => x.Key == vehicleNumber).Value.UnPark();
+            occupiedSlots.First(x => x.Key == vehicleNumber);
             occupiedSlots.Remove(vehicleNumber);
         }
 
-        private Slot GetFirstEmptySlot(List<Slot> slots)
+        public Slot GetFirstEmptySlot(List<Slot> slots)
         {
             Slot emptySlot = null;
 
@@ -114,7 +116,7 @@ namespace ParkingLot
                 int index = slots.IndexOf(slots.Where(x => x.GetSlotNumber() == slot.GetSlotNumber()).First());
                 slots[index].Park();
 
-               // slot.Park();
+                // slot.Park();
 
                 occupiedSlots.Add(vehicle.VehicleNumber, slot);
                 return new Tuple<string, long>(vehicle.VehicleNumber, slot.GetSlotNumber());
@@ -126,5 +128,30 @@ namespace ParkingLot
             }
 
         }
+
+        public Slot GetAvailableSlot(VehicleType type)
+        {
+            switch (type)
+            {
+                case VehicleType.Motorcycle:
+                    if (smallSlots.Any(x => !x.IsOccupied()))
+                        return smallSlots.FirstOrDefault(x => !x.IsOccupied());
+                    else if (compactSlots.Any(x => !x.IsOccupied()))
+                        return compactSlots.FirstOrDefault(x => !x.IsOccupied());
+                    else
+                        return largeSlots.FirstOrDefault(x => !x.IsOccupied());
+
+                case VehicleType.Car:
+                    if (compactSlots.Any(x => !x.IsOccupied()))
+                        return compactSlots.FirstOrDefault(x => !x.IsOccupied());
+                    else
+                        return largeSlots.FirstOrDefault(x => !x.IsOccupied());
+                case VehicleType.Bus:
+                    return largeSlots.FirstOrDefault(x => !x.IsOccupied());
+                default:
+                    return null;
+            }
+        }
+
     }
 }
